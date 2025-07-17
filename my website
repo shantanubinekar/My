@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Tools Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .tool-card.active {
+            border: 3px solid #667eea;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e8edff 100%);
+        }
+
+        .tool-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .tool-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .tool-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .workspace {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 400px;
+            display: none;
+        }
+
+        .workspace.active {
+            display: block;
+        }
+
+        .file-upload {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #764ba2;
+            background: #f5f7ff;
+        }
+
+        .file-upload.dragover {
+            border-color: #764ba2;
+            background: #e8edff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .tool-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .option-group h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .option-group input, .option-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tool-card {
+                padding: 20px;
+            }
+            
+            .workspace {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 PDF Tools Pro</h1>
+            <p>Your all-in-one PDF processing solution</p>
+        </div>
+
+        <div id="toolsGrid" class="tools-grid">
+            <div class="tool-card" data-tool="merge">
+                <div class="tool-icon">🔗</div>
+                <div class="tool-title">Merge PDFs</div>
+                <div class="tool-description">Combine multiple PDF files into a single document with custom ordering and settings.</div>
+            </div>
+
+            <div class="tool-card" data-tool="split">
+                <div class="tool-icon">✂️</div>
+                <div class="tool-title">Split PDF</div>
+                <div class="tool-description">Extract specific pages or split PDF into multiple documents by page ranges.</div>
+            </div>
+
+            <div class="tool-card" data-tool="compress">
+                <div class="tool-icon">🗜️</div>
+                <div class="tool-title">Compress PDF</div>
+                <div class="tool-description">Reduce PDF file size while maintaining quality for easier sharing and storage.</div>
+            </div>
+
+            <div class="tool-card" data-tool="convert">
+                <div class="tool-icon">🔄</div>
+                <div class="tool-title">Convert Files</div>
+                <div class="tool-description">Convert images, documents, and other files to PDF format or PDF to other formats.</div>
+            </div>
+
+            <div class="tool-card" data-tool="rotate">
+                <div class="tool-icon">🔄</div>
+                <div class="tool-title">Rotate Pages</div>
+                <div class="tool-description">Rotate PDF pages clockwise or counterclockwise to correct orientation.</div>
+            </div>
+
+            <div class="tool-card" data-tool="extract">
+                <div class="tool-icon">📝</div>
+                <div class="tool-title">Extract Text</div>
+                <div class="tool-description">Extract text content from PDF files for editing or analysis purposes.</div>
+            </div>
+        </div>
+
+        <div id="workspace" class="workspace">
+            <button class="back-btn" onclick="showToolsGrid()">← Back to Tools</button>
+            
+            <div id="workspaceContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class PDFToolsApp {
+            constructor() {
+                this.currentTool = null;
+                this.files = [];
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                // Tool selection
+                document.querySelectorAll('.tool-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const tool = e.currentTarget.dataset.tool;
+                        this.selectTool(tool);
+                    });
+                });
+            }
+
+            selectTool(toolName) {
+                this.currentTool = toolName;
+                document.getElementById('toolsGrid').style.display = 'none';
+                document.getElementById('workspace').classList.add('active');
+                
+                // Update active tool card
+                document.querySelectorAll('.tool-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelector(`[data-tool="${toolName}"]`).classList.add('active');
+                
+                this.loadToolWorkspace(toolName);
+            }
+
+            loadToolWorkspace(toolName) {
+                const workspace = document.getElementById('workspaceContent');
+                let content = '';
+
+                switch(toolName) {
+                    case 'merge':
+                        content = this.getMergeWorkspace();
+                        break;
+                    case 'split':
+                        content = this.getSplitWorkspace();
+                        break;
+                    case 'compress':
+                        content = this.getCompressWorkspace();
+                        break;
+                    case 'convert':
+                        content = this.getConvertWorkspace();
+                        break;
+                    case 'rotate':
+                        content = this.getRotateWorkspace();
+                        break;
+                    case 'extract':
+                        content = this.getExtractWorkspace();
+                        break;
+                }
+
+                workspace.innerHTML = content;
+                this.initializeToolEvents();
+            }
+
+            getMergeWorkspace() {
+                return `
+                    <h2>🔗 Merge PDF Files</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop PDF files here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Files</button>
+                        <input type="file" id="fileInput" class="file-input" multiple accept=".pdf">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Merge Options</h3>
+                            <label>Output filename:</label>
+                            <input type="text" id="outputName" placeholder="merged_document.pdf" value="merged_document.pdf">
+                            <label style="margin-top: 10px;">
+                                <input type="checkbox" id="bookmarks"> Preserve bookmarks
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processMerge()">Merge PDFs</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear All</button>
+                    </div>
+                `;
+            }
+
+            getSplitWorkspace() {
+                return `
+                    <h2>✂️ Split PDF File</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop a PDF file here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Split Options</h3>
+                            <label>Split method:</label>
+                            <select id="splitMethod">
+                                <option value="range">By page range</option>
+                                <option value="every">Every N pages</option>
+                                <option value="single">Each page separately</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <h3>Settings</h3>
+                            <label>Page range (e.g., 1-5, 10-15):</label>
+                            <input type="text" id="pageRange" placeholder="1-5, 10-15">
+                            <label>Pages per file:</label>
+                            <input type="number" id="pagesPerFile" value="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processSplit()">Split PDF</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear</button>
+                    </div>
+                `;
+            }
+
+            getCompressWorkspace() {
+                return `
+                    <h2>🗜️ Compress PDF File</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop a PDF file here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Compression Settings</h3>
+                            <label>Compression level:</label>
+                            <select id="compressionLevel">
+                                <option value="low">Low (Best quality)</option>
+                                <option value="medium" selected>Medium (Balanced)</option>
+                                <option value="high">High (Smallest size)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <h3>Options</h3>
+                            <label>
+                                <input type="checkbox" id="optimizeImages" checked> Optimize images
+                            </label>
+                            <label>
+                                <input type="checkbox" id="removeMetadata"> Remove metadata
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processCompress()">Compress PDF</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear</button>
+                    </div>
+                `;
+            }
+
+            getConvertWorkspace() {
+                return `
+                    <h2>🔄 Convert Files</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop files here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Files</button>
+                        <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.bmp,.tiff">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Convert To</h3>
+                            <label>Output format:</label>
+                            <select id="outputFormat">
+                                <option value="pdf">PDF</option>
+                                <option value="jpg">JPG</option>
+                                <option value="png">PNG</option>
+                                <option value="word">Word Document</option>
+                                <option value="text">Text File</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <h3>Quality Settings</h3>
+                            <label>Image quality:</label>
+                            <select id="imageQuality">
+                                <option value="high">High</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processConvert()">Convert Files</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear All</button>
+                    </div>
+                `;
+            }
+
+            getRotateWorkspace() {
+                return `
+                    <h2>🔄 Rotate PDF Pages</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop a PDF file here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Rotation Settings</h3>
+                            <label>Rotation angle:</label>
+                            <select id="rotationAngle">
+                                <option value="90">90° Clockwise</option>
+                                <option value="180">180°</option>
+                                <option value="270">270° (90° Counter-clockwise)</option>
+                            </select>
+                        </div>
+                        <div class="option-group">
+                            <h3>Page Selection</h3>
+                            <label>Pages to rotate:</label>
+                            <select id="pageSelection">
+                                <option value="all">All pages</option>
+                                <option value="range">Specific range</option>
+                                <option value="odd">Odd pages only</option>
+                                <option value="even">Even pages only</option>
+                            </select>
+                            <label>Page range (e.g., 1-5, 10):</label>
+                            <input type="text" id="pageRange" placeholder="1-5, 10">
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processRotate()">Rotate Pages</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear</button>
+                    </div>
+                `;
+            }
+
+            getExtractWorkspace() {
+                return `
+                    <h2>📝 Extract Text from PDF</h2>
+                    <div class="file-upload" id="fileUpload">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">📄</div>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem;">Drag and drop a PDF file here or click to select</p>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf">
+                    </div>
+                    
+                    <div class="tool-options">
+                        <div class="option-group">
+                            <h3>Extraction Options</h3>
+                            <label>Extract from:</label>
+                            <select id="extractFrom">
+                                <option value="all">All pages</option>
+                                <option value="range">Specific pages</option>
+                                <option value="first">First page only</option>
+                            </select>
+                            <label>Page range (e.g., 1-5, 10):</label>
+                            <input type="text" id="pageRange" placeholder="1-5, 10">
+                        </div>
+                        <div class="option-group">
+                            <h3>Output Format</h3>
+                            <label>Save as:</label>
+                            <select id="outputFormat">
+                                <option value="txt">Text file (.txt)</option>
+                                <option value="copy">Copy to clipboard</option>
+                                <option value="preview">Preview only</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="fileList" class="file-list"></div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <div id="statusMessage" class="status-message"></div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="app.processExtract()">Extract Text</button>
+                        <button class="btn btn-secondary" onclick="app.clearFiles()">Clear</button>
+                    </div>
+                `;
+            }
+
+            initializeToolEvents() {
+                const fileInput = document.getElementById('fileInput');
+                const fileUpload = document.getElementById('fileUpload');
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => {
+                        this.handleFileSelect(e.target.files);
+                    });
+                }
+
+                if (fileUpload) {
+                    fileUpload.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        fileUpload.classList.add('dragover');
+                    });
+
+                    fileUpload.addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        fileUpload.classList.remove('dragover');
+                    });
+
+                    fileUpload.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        fileUpload.classList.remove('dragover');
+                        this.handleFileSelect(e.dataTransfer.files);
+                    });
+                }
+            }
+
+            handleFileSelect(files) {
+                this.files = Array.from(files);
+                this.displayFiles();
+            }
+
+            displayFiles() {
+                const fileList = document.getElementById('fileList');
+                if (!fileList) return;
+
+                fileList.innerHTML = '';
+                
+                this.files.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-size">(${this.formatFileSize(file.size)})</span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="app.removeFile(${index})">Remove</button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            removeFile(index) {
+                this.files.splice(index, 1);
+                this.displayFiles();
+            }
+
+            clearFiles() {
+                this.files = [];
+                this.displayFiles();
+                document.getElementById('fileInput').value = '';
+            }
+
+            showProgress(show = true) {
+                const progressBar = document.getElementById('progressBar');
+                if (progressBar) {
+                    progressBar.style.display = show ? 'block' : 'none';
+                }
+            }
+
+            updateProgress(percent) {
+                const progressFill = document.getElementById('progressFill');
+                if (progressFill) {
+                    progressFill.style.width = percent + '%';
+                }
+            }
+
+            showStatus(message, type = 'success') {
+                const statusMessage = document.getElementById('statusMessage');
+                if (statusMessage) {
+                    statusMessage.textContent = message;
+                    statusMessage.className = `status-message status-${type}`;
+                    statusMessage.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            // Processing methods (simulate processing)
+            processMerge() {
+                if (this.files.length < 2) {
+                    this.showStatus('Please select at least 2 PDF files to merge.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('PDF files merged successfully!');
+                        
+                        // Create multiple download links (simulated)
+                        this.createDownloadLink('split_part_1.pdf', 'split');
+                        this.createDownloadLink('split_part_2.pdf', 'split');
+                    }
+                }, 300);
+            }
+
+            processCompress() {
+                if (this.files.length === 0) {
+                    this.showStatus('Please select a PDF file to compress.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 12;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('PDF compressed successfully! Size reduced by 45%.');
+                        
+                        // Create download link (simulated)
+                        const originalName = this.files[0].name;
+                        const compressedName = originalName.replace('.pdf', '_compressed.pdf');
+                        this.createDownloadLink(compressedName, 'compressed');
+                    }
+                }, 250);
+            }
+
+            processConvert() {
+                if (this.files.length === 0) {
+                    this.showStatus('Please select files to convert.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('Files converted successfully!');
+                        
+                        // Create download links for converted files
+                        this.files.forEach(file => {
+                            const outputFormat = document.getElementById('outputFormat').value;
+                            const extension = this.getFileExtension(outputFormat);
+                            const convertedName = file.name.replace(/\.[^/.]+$/, extension);
+                            this.createDownloadLink(convertedName, 'converted');
+                        });
+                    }
+                }, 200);
+            }
+
+            processRotate() {
+                if (this.files.length === 0) {
+                    this.showStatus('Please select a PDF file to rotate.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 20;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('PDF pages rotated successfully!');
+                        
+                        // Create download link (simulated)
+                        const originalName = this.files[0].name;
+                        const rotatedName = originalName.replace('.pdf', '_rotated.pdf');
+                        this.createDownloadLink(rotatedName, 'rotated');
+                    }
+                }, 200);
+            }
+
+            processExtract() {
+                if (this.files.length === 0) {
+                    this.showStatus('Please select a PDF file to extract text from.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 25;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('Text extracted successfully!');
+                        
+                        // Create download link or show preview
+                        const outputFormat = document.getElementById('outputFormat').value;
+                        if (outputFormat === 'txt') {
+                            this.createDownloadLink('extracted_text.txt', 'extracted');
+                        } else if (outputFormat === 'copy') {
+                            this.showStatus('Text copied to clipboard!');
+                        } else {
+                            this.showExtractedTextPreview();
+                        }
+                    }
+                }, 150);
+            }
+
+            getFileExtension(format) {
+                const extensions = {
+                    'pdf': '.pdf',
+                    'jpg': '.jpg',
+                    'png': '.png',
+                    'word': '.docx',
+                    'text': '.txt'
+                };
+                return extensions[format] || '.pdf';
+            }
+
+            createDownloadLink(filename, type) {
+                const fileList = document.getElementById('fileList');
+                if (!fileList) return;
+
+                const downloadItem = document.createElement('div');
+                downloadItem.className = 'file-item';
+                downloadItem.style.background = '#e8f5e8';
+                downloadItem.style.borderLeft = '4px solid #28a745';
+                downloadItem.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-name">✅ ${filename}</span>
+                        <span class="file-size">(Ready for download)</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="app.downloadFile('${filename}', '${type}')">Download</button>
+                `;
+                fileList.appendChild(downloadItem);
+            }
+
+            downloadFile(filename, type) {
+                // Simulate file download
+                this.showStatus(`Downloading ${filename}...`);
+                
+                // In a real app, this would trigger an actual download
+                // For demo purposes, we'll just show a message
+                setTimeout(() => {
+                    this.showStatus(`${filename} downloaded successfully!`);
+                }, 1000);
+            }
+
+            showExtractedTextPreview() {
+                const fileList = document.getElementById('fileList');
+                if (!fileList) return;
+
+                const previewItem = document.createElement('div');
+                previewItem.className = 'file-item';
+                previewItem.style.background = '#f8f9fa';
+                previewItem.style.borderLeft = '4px solid #007bff';
+                previewItem.style.flexDirection = 'column';
+                previewItem.style.alignItems = 'stretch';
+                previewItem.innerHTML = `
+                    <div class="file-info" style="margin-bottom: 15px;">
+                        <span class="file-name">📝 Extracted Text Preview</span>
+                    </div>
+                    <textarea style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;" readonly>
+This is a sample of extracted text from your PDF file.
+
+In a real application, this would contain the actual text content extracted from the PDF using libraries like PDF.js or similar PDF processing tools.
+
+The extracted text would preserve the structure and formatting as much as possible, making it easy to copy, edit, or analyze the content.
+
+You can then save this text as a .txt file, copy it to clipboard, or use it for further processing.
+                    </textarea>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="app.copyToClipboard()">Copy to Clipboard</button>
+                        <button class="btn btn-secondary" onclick="app.downloadFile('extracted_text.txt', 'text')">Save as TXT</button>
+                    </div>
+                `;
+                fileList.appendChild(previewItem);
+            }
+
+            copyToClipboard() {
+                // Simulate copying to clipboard
+                this.showStatus('Text copied to clipboard!');
+            }
+        }
+
+        // Initialize the app
+        const app = new PDFToolsApp();
+
+        // Global function to show tools grid
+        function showToolsGrid() {
+            document.getElementById('toolsGrid').style.display = 'grid';
+            document.getElementById('workspace').classList.remove('active');
+            app.currentTool = null;
+            app.files = [];
+            
+            // Reset active tool card
+            document.querySelectorAll('.tool-card').forEach(card => {
+                card.classList.remove('active');
+            });
+        }
+
+        // Add some animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // Add loading animation for tool cards
+            const toolCards = document.querySelectorAll('.tool-card');
+            toolCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> download link (simulated)
+                        const outputName = document.getElementById('outputName').value || 'merged_document.pdf';
+                        this.createDownloadLink(outputName, 'merged');
+                    }
+                }, 300);
+            }
+
+            processSplit() {
+                if (this.files.length === 0) {
+                    this.showStatus('Please select a PDF file to split.', 'error');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0);
+
+                // Simulate processing
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 15;
+                    this.updateProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        this.showProgress(false);
+                        this.showStatus('PDF split successfully!');
+                        
+                        // Create
